@@ -1,35 +1,35 @@
 provisioner
 ===========
 
-Handles provisioning and deployment 
+Provisioner is a highly opinionated tool for handling the deployment of services.  The following assumptions are made about the environment:
+
+* pre-baked into an AMI
+* AMI already include S3 security credentials in /etc/aws.credentials
+* the software to be deployed will be stored (a) in an s3 bucket and (b) in a pre-defined format (see below) 
 
 ## Environment Variables
 
 The following environment variables are required to provision (or deprovision) ASGs.
 
+#### Required Environment Variables
+
 |Name|Required|Description|Example|
 |:---|:-------|:----------|:------|
-|AMI_REGION|yes|the region to ami is to be deployed in|us-west-2|
-|AMI_ENV|yes|the environment. must be one of - development, staging, production|development|
-|AMI_USER|yes|the user account that our software runs under (not root)|tmtt|
-|AMI_INSTANCE_TYPE|yes|what instance type|m1.medium|
-|AMI_AZ|yes|a comma separate list of Availability Zones to run in|us-west-2a|
-|NAME|yes|the name of the service, one word, no spaces|tmtt|
-|AMI_ACCESS_KEY_ID|yes|restrictive aws credentials, these will be stored on the instance|
-|AMI_SECRET_ACCESS_KEY|yes|restrictive aws credentials, these will be stored on the instance|
+|APP_NAME|yes|the name of the service, one word, no spaces|tmtt|
+|APP_ENV|yes|the environment. must be one of - development, staging, production|development|
 |AWS_ACCESS_KEY_ID|yes|aws credentials for managing the instances (not stored on the instance)|
 |AWS_SECRET_ACCESS_KEY|yes|aws credentials for managing the instances (not stored on the instance)|
 
-## Conventions
+#### Optional Environment Variables
 
-For now, this package uses a lot of conventions to simplify the configuration of other AWS services. 
-
-|Service|Value|Description|Example|
-|:------|:----|:----------|:------|
-|Elastic Load Balancer (ELB)|#{NAME}-#{AMI_ENV}|provisioner deployer instances as ASGs.  each ASG is mounted behind and ELB.  these ELB have names defined by convention|tmtt-development|
-|Security Groups|#{NAME}|Each instance will use a security group that shares the same name as NAME above|tmtt|
-|SSH Key Pair|#{NAME}|Each instance will also use a key-pair with the same name as the group|tmtt|
-|CI build number|GO_PIPELINE_COUNTER|For now, this tool only supports Thoughtwork's Go.  GO_PIPELINE_COUNTER is the autoincrementing build number env variable used by go.  In future, other buil systems could be supported|
+|Name|Required|Description|Example|
+|:---|:-------|:----------|:------|
+|AMI_AZ|no|a comma separate list of Availability Zones to run in|us-west-2a|
+|AMI_ELB|no|the name of the elb to create the asg behind.  defaults to ${APP_NAME}-${APP_ENV}|tmtt-development|
+|AMI_INSTANCE_TYPE|no|what instance type. defaults to m1.small|m1.small|
+|AMI_KEY_PAIR|no|the aws ssh key pair to use.  defaults to ${APP_NAME}|
+|AMI_REGION|no|the region to ami is to be deployed in|us-west-2|
+|AMI_SECURITY_GROUP|no|the aws security the instances should belong to.  defaults to ${APP_NAME}|
  
 ## Input
 
